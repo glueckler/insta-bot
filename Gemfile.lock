@@ -18,6 +18,7 @@ GEM
     selenium-webdriver (3.142.0)
       childprocess (>= 0.5, < 2.0)
       rubyzip (~> 1.2, >= 1.2.2)
+    slop (4.6.2)
     watir (6.16.5)
       regexp_parser (~> 1.2)
       selenium-webdriver (~> 3.6)
@@ -32,6 +33,7 @@ PLATFORMS
 DEPENDENCIES
   pg
   pry
+  slop
   watir
   webdrivers (~> 3.0)
 

@@ -7,6 +7,8 @@ class Database
   UNIX_MONTH = 2629743
   UNIX_DAY = 86400
 
+  attr_reader :daily_likes_ish
+  
   def self.exec(statement)
     conn = PG.connect :dbname => 'insta_bot', :user => 'dbean'
     conn.exec statement
@@ -14,6 +16,7 @@ class Database
   
   def initialize
     @conn = PG.connect :dbname => 'insta_bot', :user => 'dbean'
+    exceeding_max_actions # just to update the daily likes
   end
 
   def add_user(username)
@@ -67,7 +70,7 @@ class Database
     recent = now - UNIX_MONTH
     result = log_exec "SELECT * FROM actions 
     WHERE username = '#{username}' 
-    and time < #{recent}"
+    and time > #{recent}"
     # check it's empty
     !result.num_tuples.zero?
   end
@@ -76,11 +79,12 @@ class Database
     day_ago = now - UNIX_DAY
     results = log_exec "SELECT * FROM actions
     WHERE time > #{day_ago} AND type = '#{type}'"
+    @daily_likes_ish = results.num_tuples
     results.num_tuples > max
   end
   
   def init_database
-    @conn.exec "DROP TABLE IF EXISTS users"
+    @conn.exec 'DROP TABLE IF EXISTS users'
     @conn.exec "CREATE TABLE users(
       id SERIAL PRIMARY KEY,
       username VARCHAR(30) NOT NULL UNIQUE,
@@ -103,9 +107,11 @@ class Database
   private
 
   def log_exec(query)
-    puts "PSQL -->"
-    puts query
-    puts "- - - - - - - - - -"
+    unless Global::OPTS.quiet?
+      puts 'PSQL -->'
+      puts query
+      puts '<--'
+    end 
     @conn.exec query
   end
 
