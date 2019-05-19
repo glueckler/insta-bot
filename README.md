@@ -2,7 +2,17 @@
 
 ## cli
 
-put commands here
+__bot life..__
+
+INSTA_USER=organismanize INSTA_PASS=<pass> ruby ./bot.rb
+
+__quiet sql queries__
+
+INSTA_USER=organismanize INSTA_PASS=<pass> ruby ./bot.rb -q 
+
+__init database tables__
+
+ruby ./database_init.rb
 
 
 ## bot flow
@@ -43,8 +53,6 @@ bot clicks on an image to see likes
 
 bot scrapes user account names from list
 
-bot assumes __wake up flow__
-
 ---
 
 __user interaction flow__
@@ -74,8 +82,11 @@ if user follows more than 2 accounts which bot also follows, bot follows user
 ---
 
 
+## related pages
+Add related (related to your style) pages to the main_accts.txt
+
 ## todo
 
--> build list of related pages (in file in repository)
 -> check if user has more than 2000 follows
+
 -> check if user follows me

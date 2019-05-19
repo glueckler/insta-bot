@@ -4,14 +4,15 @@ class Navigation
   require './utils.rb'
   require './action.rb'
 
-  MAIN_ACCTS = [
-    'shambhala_mf'
-  ]
-  
   attr_accessor :page
   def initialize(brow:, page: nil)
     @page = page
     @brow = brow
+
+    @main_accts = []
+    f = open('main_accts.txt')
+    f.each_line { |line| @main_accts << line }
+    f.close
   end
 
   def login
@@ -47,7 +48,8 @@ class Navigation
   end
 
   def goto_a_main_acct
-    goto_acct(MAIN_ACCTS.sample)
+    puts "going to a main account"
+    goto_acct(@main_accts.sample)
   end
 
   def goto_rnd_likes_list
