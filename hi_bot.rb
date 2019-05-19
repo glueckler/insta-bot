@@ -9,6 +9,7 @@ class HiBot
   ERR_INACTIVE_ACCT = 'account is inactive'
   ERR_NO_USER_FOUND = 'could not find a random user in database'
   MAX_DAILY_LIKES = 380
+  MAX_HOURLY_LIKES = 100
   
   attr_reader :navigation, :action, :brow
 
@@ -24,9 +25,7 @@ class HiBot
   end
 
   def bot_checks
-    puts "daily likes.. roughly.. #{@db.daily_likes_ish}" if @db.daily_likes_ish
-    
-    if @db.exceeding_max_actions(max: MAX_DAILY_LIKES)
+    if @db.exceeding_max_actions(max: MAX_DAILY_LIKES, max_hourly: MAX_HOURLY_LIKES)
       return { error: ERR_MAX_LIKES, continue: false }     
     end
     

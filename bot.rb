@@ -18,7 +18,7 @@ class Global
 
   def nap
     puts "\nGOING TO TAKE A NAP...\n..\n."
-    sleep(10000)
+    sleep(4000) # over an hour
   end
 
   def dream

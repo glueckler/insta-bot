@@ -6,8 +6,6 @@ class Database
   UNIX_MONTH = 2629743
   UNIX_DAY = 86400
 
-  attr_reader :daily_likes_ish
-  
   def self.conn 
     PG.connect :dbname => 'insta_bot', :user => 'dbean'
   end
@@ -42,11 +40,6 @@ class Database
 
   #  #  #
   
-  def initialize
-    puts "init the db object, check the amount of actions.."
-    exceeding_max_actions # just to update the daily likes
-  end
-
   def add_user(username)
     begin
       log_exec "INSERT INTO users (username, interaction_ts) VALUES ('#{username}', 0)"
@@ -114,12 +107,24 @@ class Database
     !result.num_tuples.zero?
   end
 
-  def exceeding_max_actions(type: ACT_LIKE, max: 380) 
+  def exceeding_max_actions(type: ACT_LIKE, max: 380, max_hourly: 100)
     day_ago = now - UNIX_DAY
-    results = log_exec "SELECT * FROM actions
+    hour_ago = now - (UNIX_DAY / 24)
+
+    # daily
+    res = log_exec "SELECT * FROM actions
     WHERE time > #{day_ago} AND type = '#{type}'"
-    @daily_likes_ish = results.num_tuples
-    results.num_tuples > max
+    results_daily = res.num_tuples
+    exceeded_daily = results_daily > max
+    # hourly
+    res = log_exec "SELECT * FROM actions
+    WHERE time > #{hour_ago} AND type = '#{type}'"
+    results_hourly = res.num_tuples
+    exceeded_hourly = results_hourly > max_hourly
+
+    puts "Daily likes: #{results_daily} .. Hourly likes: #{results_hourly}"
+
+    exceeded_daily || exceeded_hourly
   end
   
   private
