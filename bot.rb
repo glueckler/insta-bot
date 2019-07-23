@@ -18,7 +18,7 @@ class Global
 
   def nap
     puts "\nGOING TO TAKE A NAP...\n..\n."
-    sleep(4000) # over an hour
+    sleep(2000) # over an hour
   end
 
   def dream
@@ -28,20 +28,26 @@ class Global
   def the_loop
     while @bot_on
       dream
+      nap if [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2].sample == 1 #random naps
       puts "oh man, we have: #{errors.length} errors.." unless errors.empty?
 
       status = bot.bot_checks
-      nap if status[:error] == HiBot::ERR_MAX_LIKES
-      next unless status[:continue]
+      stop_liking = status[:error] == HiBot::ERR_MAX_LIKES
 
-      status = bot.find_user_to_interact
+      status = if stop_liking
+                 bot.find_user_to_relevate
+               else
+                 bot.find_user_to_interact
+               end
+
       if status[:error] == HiBot::ERR_NO_USER_FOUND
         puts status[:error]
         bot.comb_usernames_from_rnd_main
         next
       end
 
-      status = bot.go_like_something(status[:user])
+      status = bot.go_like_something(status[:user], stop_liking)
+
       if status[:error]
         puts "! ! !"
         puts status[:error]

@@ -1,6 +1,6 @@
 class Action
   require './utils.rb'
-  
+
   def initialize(brow:)
     @brow = brow
   end
@@ -13,7 +13,7 @@ class Action
   def like_img
     @brow.span(aria_label: 'Like').click
   end
-  
+
   def get_list_of_users_from_likes
     likes_modal = @brow.div(class: 'i0EQd')
     scroll_count = 0
@@ -27,8 +27,21 @@ class Action
     usernames_list
   end
 
+  def get_list_of_users_from_following
+    following_modal = @brow.div(class: 'isgrP')
+    scroll_count = 0
+    usernames_list = []
+    while scroll_count < 40
+      usernames_list = (usernames_list + read_visible_usernames(following_modal)).uniq
+      Utils.scroll_to_bottom(following_modal.child.div)
+      scroll_count += 1
+      sleep(0.2)
+    end
+    usernames_list
+  end
+
   private
-  
+
   def read_visible_usernames(parent)
     parent.as(title: /\w+/).map { |el| el.title.strip }
   end

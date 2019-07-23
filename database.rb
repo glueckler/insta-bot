@@ -6,15 +6,15 @@ class Database
   UNIX_MONTH = 2629743
   UNIX_DAY = 86400
 
-  def self.conn 
-    PG.connect :dbname => 'insta_bot', :user => 'dbean'
+  def self.conn
+    PG.connect :dbname => 'insta_bot', :user => 'shiftbean'
   end
-  
+
   def self.exec(statement)
     conn = Database.conn
     conn.exec statement
   end
-    
+
   def self.init_database
     conn = Database.conn
     conn.exec 'DROP TABLE IF EXISTS actions'
@@ -24,9 +24,10 @@ class Database
       username VARCHAR(30) NOT NULL UNIQUE,
       private BOOLEAN,
       invalid BOOLEAN,
-      interaction_ts INTEGER
+      interaction_ts INTEGER,
+      relevance INTEGER
     )"
-    
+
     # this is more of an audits table
     # we'll query this table to see if we've gone over max daily actions
     conn.exec "CREATE TABLE actions(
@@ -39,10 +40,10 @@ class Database
   end
 
   #  #  #
-  
+
   def add_user(username)
     begin
-      log_exec "INSERT INTO users (username, interaction_ts) VALUES ('#{username}', 0)"
+      log_exec "INSERT INTO users (username, interaction_ts, relevance) VALUES ('#{username}', 0, 0)"
     rescue StandardError => what
       if what.exception.class == PG::UniqueViolation
         puts "user #{username} already found.."
@@ -86,12 +87,30 @@ class Database
     username = '#{username}'"
   end
 
+  def set_user_relevance(username, relevance)
+    log_exec "UPDATE users
+    SET relevance = #{relevance.to_i}
+    WHERE
+    username = '#{username}'"
+  end
+
   def random_user
-    recent = now - UNIX_MONTH
-    username = log_exec "SELECT username AS username from users 
+    # recent will be either 1,2,3,4,5,6 months and therefore older users will be more likely to come up
+    recent = now - (UNIX_MONTH * [1,2,3,4,5,6].sample)
+    username = log_exec "SELECT username AS username from users
     WHERE invalid IS NOT true
     AND private IS NOT true
     AND interaction_ts < #{recent}
+    ORDER BY relevance DESC, interaction_ts ASC limit 1"
+
+    return :no_user if username.values.empty?
+    return username[0]['username']
+  end
+
+  def random_user_with_zero_rel
+    username = log_exec "SELECT username AS username from users
+    WHERE relevance = 0
+    AND private IS NOT true
     ORDER BY random() limit 1"
 
     return :no_user if username.values.empty?
@@ -99,9 +118,9 @@ class Database
   end
 
   def recent_user_like_action?(username)
-    
-    result = log_exec "SELECT * FROM actions 
-    WHERE username = '#{username}' 
+
+    result = log_exec "SELECT * FROM actions
+    WHERE username = '#{username}'
     and time > #{recent}"
     # check it's empty
     !result.num_tuples.zero?
@@ -126,13 +145,13 @@ class Database
 
     exceeded_daily || exceeded_hourly
   end
-  
+
   private
 
   def connect
     @conn = Database.conn
   end
-  
+
   def disconnect
     @conn.close if @conn
   end
@@ -144,7 +163,7 @@ class Database
         puts 'PSQL -->'
         puts query
         puts '<--'
-      end 
+      end
     rescue => e
       puts '! ! !'
       puts 'if this is a NameError about Global.. its prolly fine..'
@@ -162,7 +181,7 @@ class Database
 
 end
 
-# Database.exec "ALTER TABLE actions 
+# Database.exec "ALTER TABLE actions
 # ADD COLUMN time INTEGER"
 
 # Database.exec "ALTER TABLE actions
@@ -172,5 +191,8 @@ end
 # DROP COLUMN user_id"
 
 # puts Database.new.user "ashton.1012"
+
+# Database.exec "ALTER TABLE users
+# ADD COLUMN relevance INTEGER"
 
 

@@ -34,17 +34,20 @@ class Navigation
     # click on random image
     images = @brow.divs(class: 'eLAPa')
     Utils.sleep_block { Array(images).sample.click }
-  end  
-  
+  end
+
   def goto_rnd_img_with_likes_btn_and_click
     no_likes_btn = true
-    while(no_likes_btn) do
+    while no_likes_btn do
       goto_rnd_img
-      likes_btn = @brow.button(visible_text: /others/)
-      likes_btn = @brow.button(visible_text: /likes/) unless likes_btn.present?
+      likes_btn = @brow.div(class: 'Nm9Fw').button(visible_text: /others/)
+      likes_btn = @brow.div(class: 'Nm9Fw').button(visible_text: /likes/) unless likes_btn.present?
       no_likes_btn = false if likes_btn.present?
     end
     likes_btn.click
+  rescue Selenium::WebDriver::Error::ElementNotInteractableError
+    # i haven't tested whether this catches anything, if you see this, at least it does something
+    puts "Error, this is happening: Selenium::WebDriver::Error::ElementNotInteractableError"
   end
 
   def goto_a_main_acct
@@ -58,6 +61,11 @@ class Navigation
   end
 
   def goto_acct(username)
-    Utils.sleep_block { @brow.goto("https://www.instagram.com/#{username}") } 
+    Utils.sleep_block { @brow.goto("https://www.instagram.com/#{username}") }
+  end
+
+  def goto_following_modal
+    # -nal3 is the following button
+    @brow.ul(class: 'k9GMp').as(class: '-nal3')[-1].click
   end
 end
