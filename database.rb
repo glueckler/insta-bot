@@ -43,7 +43,7 @@ class Database
 
   def add_user(username)
     begin
-      log_exec "INSERT INTO users (username, interaction_ts, relevance) VALUES ('#{username}', 0, 0)"
+      log_exec "INSERT INTO users (username, interaction_ts, relevance) VALUES ('#{username}', 0, -1)"
     rescue StandardError => what
       if what.exception.class == PG::UniqueViolation
         puts "user #{username} already found.."
@@ -94,6 +94,13 @@ class Database
     username = '#{username}'"
   end
 
+  def user_relevance_unknown(username)
+    result = log_exec "SELECT relevance AS relevance FROM users
+    WHERE username = '#{username}'"
+    return :no_user if result.values.empty?
+    result[0]['relevance'] == "-1"
+  end
+
   def random_user
     # recent will be either 1,2,3,4,5,6 months and therefore older users will be more likely to come up
     recent = now - (UNIX_MONTH * [1,2,3,4,5,6].sample)
@@ -109,7 +116,7 @@ class Database
 
   def random_user_with_zero_rel
     username = log_exec "SELECT username AS username from users
-    WHERE relevance = 0
+    WHERE relevance = -1
     AND private IS NOT true
     ORDER BY random() limit 1"
 

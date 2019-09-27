@@ -8,8 +8,8 @@ class HiBot
   ERR_PRIV_ACCT     = 'account is private'
   ERR_INACTIVE_ACCT = 'account is inactive'
   ERR_NO_USER_FOUND = 'could not find a random user in database'
-  MAX_DAILY_LIKES   = 380
-  MAX_HOURLY_LIKES  = 100
+  MAX_DAILY_LIKES   = 100
+  MAX_HOURLY_LIKES  = 5
 
   attr_reader :navigation, :action, :brow
 
@@ -24,10 +24,18 @@ class HiBot
     navigation.login
   end
 
+  def bot_refresh
+    @brow.close
+    @brow       = Brow.new.brow
+    @navigation = Navigation.new(brow: brow)
+    @action     = Action.new(brow: brow)
+  end
+
   def bot_checks
-    if @db.exceeding_max_actions(max: MAX_DAILY_LIKES, max_hourly: MAX_HOURLY_LIKES)
-      return { error: ERR_MAX_LIKES }
-    end
+    # skip this check for now
+    # if @db.exceeding_max_actions(max: MAX_DAILY_LIKES, max_hourly: MAX_HOURLY_LIKES)
+    #   return { error: ERR_MAX_LIKES }
+    # end
 
     { error: nil }
   end
@@ -39,7 +47,7 @@ class HiBot
 
     return { error: ERR_NO_USER_FOUND} if username == :no_user
 
-    puts "found user with zero relevance: '#{username}'"
+    puts "found user with no relevance: '#{username}'"
 
     { error: nil, user: username }
   end
@@ -69,107 +77,10 @@ class HiBot
   end
 
   def find_user_relevance(username)
-    relevant_usernames = ['clozeemusic',
-                          'the_supreme_hustle',
-                          'subchakra',
-                          'griz',
-                          'shambhala_mf',
-                          'submersive.tribe',
-                          'goodnightout_vancouver',
-                          'digitalmotionevents',
-                          'fozzyfest',
-                          'oakkmusic',
-                          'shinytings',
-                          'bassnectar',
-                          'digitalmotionevents',
-                          'mysticstate',
-                          'grove_stage',
-                          'coltcutsmusic',
-                          'freqmag',
-                          'smigonaut',
-                          'sevenlionsmusic',
-                          'smalltowndjs',
-                          'bamboofestival',
-                          'skratchbastid',
-                          'thefunkhunters',
-                          'abstraktsonance',
-                          'basscoastfest',
-                          'opiuo',
-                          'librarianmusic',
-                          'splice',
-                          'fatherfunk',
-                          'atomiqueevents',
-                          'moontricks_music',
-                          'hificlub',
-                          'supertaskmusic',
-                          'goopsteppa',
-                          'evanslynk',
-                          'stickybuds',
-                          'rusko',
-                          'kllsmth',
-                          'mrbillstunes',
-                          'frq_ncy',
-                          'subfmradio',
-                          'eazybakedbeats',
-                          'shlumpbass',
-                          'submission',
-                          'method_sound',
-                          'wormholewednesdaymusicgroup',
-                          'bleepbloopbass',
-                          'charles.thefirst',
-                          'deepdarkand_dangerous',
-                          'liquidstranger',
-                          'shahdjs',
-                          'stylustbeats',
-                          'thelem_',
-                          'emissions_festival',
-                          'ukf',
-                          'thissongissick',
-                          'cjsw',
-                          'futureforestfestival',
-                          'electriclovemusicfestival',
-                          'pksound',
-                          'heyits_pablo',
-                          'tribevictoria',
-                          'eptic',
-                          'alixperez1985',
-                          'eprombeats',
-                          'chuurchmusic',
-                          '_digitalethos',
-                          'greazus',
-                          'drt_substance_420',
-                          'itsstrangething',
-                          '_slugwife_',
-                          'yhetimusic',
-                          'therealmueseum',
-                          'erski_shahdjs',
-                          'pigeon_hole',
-                          'littlesnakemusic',
-                          'doyudigital',
-                          'jadecicada.flac',
-                          'russliquid',
-                          'freddytoddmusic',
-                          'shponglemusic',
-                          'illgatesmusic',
-                          'gjonesbass',
-                          'ivylab',
-                          'doctorpcircus',
-                          'atliensofficial',
-                          'zomboy',
-                          'matter.bass',
-                          'skrillex',
-                          'getter',
-                          'bass_network',
-                          'space_laces',
-                          'kursaaaa',
-                          'downlink',
-                          'zeke_beats',
-                          'whatfest_',
-                          'gspacemusic',
-                          'ganjawhitenight',
-                          'lostlandsfestival',
-                          'minnesotabass'
-    ]
+    relevant_usernames = []
+    f = open('relevant_accts.txt')
+    f.each_line { |line| relevant_usernames << line.strip }
+    f.close
 
     puts "finding user relevance"
     navigation.goto_following_modal
@@ -177,7 +88,7 @@ class HiBot
     usernames = action.get_list_of_users_from_following
     relevance_score = 0
     for user in usernames do
-      relevance_score = relevance_score + 1 if relevant_usernames.include?(user)
+      relevance_score = relevance_score + 1 if relevant_usernames.include?(user.strip)
     end
 
     puts "found #{usernames.length} usernames"
@@ -185,7 +96,7 @@ class HiBot
     @db.set_user_relevance(username, relevance_score)
   end
 
-  def go_like_something(username, stop_liking)
+  def go_like_something_and_relevate(username, stop_liking)
     navigation.goto_acct(username)
 
     # do some checks
@@ -199,7 +110,7 @@ class HiBot
       return { error: ERR_INACTIVE_ACCT }
     end
 
-    find_user_relevance(username)
+    find_user_relevance(username) if @db.user_relevance_unknown(username)
 
     unless stop_liking
       begin

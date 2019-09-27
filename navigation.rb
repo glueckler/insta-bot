@@ -19,15 +19,12 @@ class Navigation
     Utils.sleep_block { @brow.goto('https://www.instagram.com/accounts/login/') }
     password = ENV['INSTA_PASS']
     username = ENV['INSTA_USER']
+
     # sign in
     @brow.text_field(name: 'username').set "#{username}"
     @brow.text_field(name: 'password').set "#{password}"
     @brow.button(type: 'submit').click
     @brow.button(text: 'Not Now').click
-  end
-
-  def dream
-    puts "..!...~..~....."
   end
 
   def goto_rnd_img

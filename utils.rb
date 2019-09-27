@@ -2,7 +2,7 @@ class Utils
   def self.sleep_block(&block)
     block.call
     # pick from a random sample of sleep times
-    sleep([2, 3.3, 3.7, 5.1, 5.5, 5.7, 7.7, 5.2, 6.3, 9].sample)
+    sleep([5.1, 5.5, 5.7, 7.7, 5.2, 6.3, 9].sample)
   end
 
   def self.insta_acct_page?(brow)

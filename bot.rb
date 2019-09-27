@@ -8,10 +8,12 @@ class Global
   end
 
   attr_accessor :errors, :bot
+
   def initialize
-    @bot_on = true
-    @errors = []
-    @bot = HiBot.new
+    @bot_on           = true
+    @last_bot_refresh = Time.now.to_i
+    @errors           = []
+    @bot              = HiBot.new
     @bot.login
     bot_do
   end
@@ -28,11 +30,22 @@ class Global
   def the_loop
     while @bot_on
       dream
-      nap if [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2].sample == 1 #random naps
+
+      nap if [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2].sample == 1 #random naps
+
+
+      if Time.now.to_i > (@last_bot_refresh + 4000)
+        @last_bot_refresh = Time.now.to_i
+        puts "restarting the browser. .. ..."
+        @bot.bot_refresh
+        @bot.login
+      end
+
       puts "oh man, we have: #{errors.length} errors.." unless errors.empty?
 
-      status = bot.bot_checks
-      stop_liking = status[:error] == HiBot::ERR_MAX_LIKES
+      # status      = bot.bot_checks
+      # stop_liking = status[:error] == HiBot::ERR_MAX_LIKES
+      stop_liking = true
 
       status = if stop_liking
                  bot.find_user_to_relevate
@@ -46,7 +59,7 @@ class Global
         next
       end
 
-      status = bot.go_like_something(status[:user], stop_liking)
+      status = bot.go_like_something_and_relevate(status[:user], stop_liking)
 
       if status[:error]
         puts "! ! !"
@@ -68,6 +81,6 @@ class Global
       bot_do
     end
   end
-end
+  end
 
-Global.new
+  Global.new
