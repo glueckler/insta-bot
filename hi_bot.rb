@@ -45,7 +45,7 @@ class HiBot
 
     username = @db.random_user_with_zero_rel
 
-    return { error: ERR_NO_USER_FOUND} if username == :no_user
+    return { error: ERR_NO_USER_FOUND } if username == :no_user
 
     puts "found user with no relevance: '#{username}'"
 
@@ -57,7 +57,7 @@ class HiBot
 
     username = @db.random_user
 
-    return { error: ERR_NO_USER_FOUND} if username == :no_user
+    return { error: ERR_NO_USER_FOUND } if username == :no_user
 
     puts "found fresh user: '#{username}'"
 
@@ -78,21 +78,32 @@ class HiBot
 
   def find_user_relevance(username)
     relevant_usernames = []
-    f = open('relevant_accts.txt')
+    f                  = open('relevant_accts.txt')
     f.each_line { |line| relevant_usernames << line.strip }
     f.close
 
     puts "finding user relevance"
     navigation.goto_following_modal
 
-    usernames = action.get_list_of_users_from_following
+    usernames       = action.get_list_of_users_from_following
+    usernames_add_to_network = []
     relevance_score = 0
     for user in usernames do
-      relevance_score = relevance_score + 1 if relevant_usernames.include?(user.strip)
+      if relevant_usernames.include?(user.strip)
+        relevance_score = relevance_score + 1
+        usernames_add_to_network.push user.strip
+      end
     end
 
     puts "found #{usernames.length} usernames"
+    @db.set_user_follow_count(username, usernames.length)
     puts "relevance score for #{username} is #{relevance_score}"
+    usernames_add_to_network.each do |u|
+      puts u
+    end
+    usernames_add_to_network.each do |u|
+      @db.add_network_connection(u, username)
+    end
     @db.set_user_relevance(username, relevance_score)
   end
 

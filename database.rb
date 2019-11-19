@@ -17,26 +17,36 @@ class Database
 
   def self.init_database
     conn = Database.conn
-    conn.exec 'DROP TABLE IF EXISTS actions'
-    conn.exec 'DROP TABLE IF EXISTS users'
-    conn.exec "CREATE TABLE users(
-      id SERIAL PRIMARY KEY,
-      username VARCHAR(30) NOT NULL UNIQUE,
-      private BOOLEAN,
-      invalid BOOLEAN,
-      interaction_ts INTEGER,
-      relevance INTEGER
-    )"
+    # conn.exec 'DROP TABLE IF EXISTS actions'
+    # conn.exec 'DROP TABLE IF EXISTS users'
+    # conn.exec "CREATE TABLE users(
+    #   id SERIAL PRIMARY KEY,
+    #   username VARCHAR(30) NOT NULL UNIQUE,
+    #   private BOOLEAN,
+    #   invalid BOOLEAN,
+    #   cc,
+    #   relevance INTEGER,
+    #   following_count INTEGER
+    # )"
+    #
+    # # this is more of an audits table
+    # # we'll query this table to see if we've gone over max daily actions
+    # conn.exec "CREATE TABLE actions(
+    #   id SERIAL PRIMARY KEY,
+    #   type VARCHAR(30),
+    #   username VARCHAR(30) REFERENCES users(username),
+    #   time INTEGER,
+    #   psql_time timestamptz NOT NULL DEFAULT now()
+    # )"
 
-    # this is more of an audits table
-    # we'll query this table to see if we've gone over max daily actions
-    conn.exec "CREATE TABLE actions(
-      id SERIAL PRIMARY KEY,
-      type VARCHAR(30),
-      username VARCHAR(30) REFERENCES users(username),
-      time INTEGER,
-      psql_time timestamptz NOT NULL DEFAULT now()
-    )"
+    # conn.exec "CREATE TABLE network(
+    #   id SERIAL PRIMARY KEY,
+    #   username VARCHAR(30),
+    #   followed_by VARCHAR(30),
+    #   interaction_ts INTEGER
+    # )"
+    #
+
   end
 
   #  #  #
@@ -90,6 +100,13 @@ class Database
   def set_user_relevance(username, relevance)
     log_exec "UPDATE users
     SET relevance = #{relevance.to_i}
+    WHERE
+    username = '#{username}'"
+  end
+
+  def set_user_follow_count(username, following_count)
+    log_exec "UPDATE users
+    SET following_count = #{following_count.to_i}
     WHERE
     username = '#{username}'"
   end
@@ -153,6 +170,16 @@ class Database
     exceeded_daily || exceeded_hourly
   end
 
+  #
+  # NETWORK TABLE OPERATIONSSSS
+  #
+  def add_network_connection(user_followed, followed_by)
+    ts = DateTime.now.strftime('%s')
+    log_exec "INSERT INTO network
+    (username, followed_by, interaction_ts)
+    VALUES
+    ('#{user_followed}','#{followed_by}',#{ts})"
+  end
   private
 
   def connect
@@ -201,5 +228,9 @@ end
 
 # Database.exec "ALTER TABLE users
 # ADD COLUMN relevance INTEGER"
+#
+#
+# # Database.exec "ALTER TABLE users
+# # ADD COLUMN following_count INTEGER"
 
 
