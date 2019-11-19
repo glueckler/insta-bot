@@ -8,6 +8,7 @@ class HiBot
   ERR_PRIV_ACCT     = 'account is private'
   ERR_INACTIVE_ACCT = 'account is inactive'
   ERR_NO_USER_FOUND = 'could not find a random user in database'
+  ERR_WAIT_ERROR = 'instagram is not cooperating'
   MAX_DAILY_LIKES   = 100
   MAX_HOURLY_LIKES  = 5
 
@@ -119,6 +120,9 @@ class HiBot
       puts "#{username} doesn't seem to be an account"
       @db.mark_user_invalid(username)
       return { error: ERR_INACTIVE_ACCT }
+    elsif Utils.should_wait_a_while(brow)
+      puts '!!! shit is blocked'
+      return { error: ERR_WAIT_ERROR }
     end
 
     find_user_relevance(username) if @db.user_relevance_unknown(username)

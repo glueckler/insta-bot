@@ -6,12 +6,16 @@ class Utils
   end
 
   def self.insta_acct_page?(brow)
-    brow.div(class: "nZSzR").present?
+    !brow.element(text: "Sorry, this page isn't available.").present?
   end
 
   def self.private_acct?(brow)
     return false unless self.insta_acct_page?(brow)
     brow.element(text: "This Account is Private").present?
+  end
+
+  def self.should_wait_a_while(brow)
+    brow.element(text: "Please wait a few minutes before you try again.").present?
   end
 
   def self.scroll_to_bottom(container)

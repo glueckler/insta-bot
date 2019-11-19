@@ -20,7 +20,12 @@ class Global
 
   def nap
     puts "\nGOING TO TAKE A NAP...\n..\n."
-    sleep(2000) # over an hour
+    sleep(500) 
+  end
+
+  def long_nap
+    puts "\nTAKING A LONG SLEEP...\n..\n."
+    sleep(4000) 
   end
 
   def dream
@@ -66,6 +71,11 @@ class Global
         puts status[:error]
         puts "! ! !"
       end
+
+      if status[:error] == HiBot::ERR_WAIT_ERROR
+        long_nap
+      end
+
     end
   end
 
