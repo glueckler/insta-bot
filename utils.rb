@@ -21,4 +21,12 @@ class Utils
   def self.scroll_to_bottom(container)
     container.scroll.to :bottom
   end
+
+  def self.scroll_up(container)
+    container.scroll.by(0, -100) # this isn't working,,
+  end
+
+  def self.scroll_to_top(container)
+    container.scroll.to :top
+  end
 end
