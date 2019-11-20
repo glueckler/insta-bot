@@ -20,23 +20,31 @@ class Global
 
   def nap
     puts "\nGOING TO TAKE A NAP...\n..\n."
-    sleep(500) 
+    sleep(900) # 15mins
   end
 
   def long_nap
     puts "\nTAKING A LONG SLEEP...\n..\n."
-    sleep(4000) 
+    sleep(4000)
   end
 
   def dream
     puts "~--`~-~~~____`~~~~"
   end
 
+  def sleep_cycle
+    nap
+    @cycle_count = 0
+  end
+
   def the_loop
     while @bot_on
       dream
 
-      nap if [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2].sample == 1 #random naps
+      @cycle_count ||= 0
+      @cycle_count += 1
+      puts "cycle count: " + @cycle_count.to_s
+      sleep_cycle if @cycle_count == 9
 
 
       if Time.now.to_i > (@last_bot_refresh + 4000)
