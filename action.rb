@@ -31,19 +31,19 @@ class Action
     following_modal = @brow.div(class: 'isgrP')
     scroll_without_loading_anymore_users = 0
     usernames_list = []
-    while scroll_without_loading_anymore_users < 10 && usernames_list.length < 500
+    while scroll_without_loading_anymore_users < 4 && usernames_list.length < 500
       Utils.scroll_to_top(following_modal.child.div)
-      sleep(1)
+      sleep(0.3)
       Utils.scroll_to_bottom(following_modal.child.div)
 
-      sleep(3)
+      sleep(1)
 
       previous_username_list_len = usernames_list.length
       usernames_list = (usernames_list + read_visible_usernames(following_modal)).uniq
 
       if previous_username_list_len == usernames_list.length
         scroll_without_loading_anymore_users += 1
-        puts "scroll without loading more x " + scroll_without_loading_anymore_users.to_s if scroll_without_loading_anymore_users % 5 == 0
+        puts "scroll without loading more x " + scroll_without_loading_anymore_users.to_s if scroll_without_loading_anymore_users % 2 == 0
       else
         scroll_without_loading_anymore_users = 0
         puts usernames_list.length.to_s + " usernames scrolled" if usernames_list.length % 50 > 38

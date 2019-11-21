@@ -47,6 +47,14 @@ class Database
     # )"
     #
 
+    # conn.exec "CREATE TABLE following(
+    #   id SERIAL PRIMARY KEY,
+    #   username VARCHAR(30),
+    #   followed_by VARCHAR(30),
+    #   interaction_ts INTEGER
+    # )"
+
+
   end
 
   #  #  #
@@ -180,6 +188,21 @@ class Database
     VALUES
     ('#{user_followed}','#{followed_by}',#{ts})"
   end
+
+  def add_to_following(user_followed, followed_by)
+    ts = DateTime.now.strftime('%s')
+    log_exec "INSERT INTO following
+    (username, followed_by, interaction_ts)
+    VALUES
+    ('#{user_followed}','#{followed_by}',#{ts})"
+  end
+
+  def get_relevant_user_list
+    res = log_exec "SELECT username FROM users
+    WHERE relevance > 9"
+    res.values
+  end
+
   private
 
   def connect

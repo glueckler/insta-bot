@@ -5,6 +5,7 @@ require './hi_bot.rb'
 class Global
   OPTS = Slop.parse do |o|
     o.bool '-q', '--quiet', 'suppress output (quiet mode)'
+    o.bool '-t', '--tour', 'go visit some relevant accounts'
   end
 
   attr_accessor :errors, :bot
@@ -15,12 +16,17 @@ class Global
     @errors           = []
     @bot              = HiBot.new
     @bot.login
-    bot_do
+    if Global::OPTS.tour?
+      puts "bot tour mode...."
+      bot_tour
+    else
+      bot_do
+    end
   end
 
   def nap
     puts "\nGOING TO TAKE A NAP...\n..\n."
-    sleep(900) # 15mins
+    sleep(360) # 6mins
   end
 
   def long_nap
@@ -44,15 +50,15 @@ class Global
       @cycle_count ||= 0
       @cycle_count += 1
       puts "cycle count: " + @cycle_count.to_s
-      sleep_cycle if @cycle_count == 9
+      sleep_cycle if @cycle_count == 15
 
 
-      if Time.now.to_i > (@last_bot_refresh + 4000)
-        @last_bot_refresh = Time.now.to_i
-        puts "restarting the browser. .. ..."
-        @bot.bot_refresh
-        @bot.login
-      end
+      # if Time.now.to_i > (@last_bot_refresh + 4000)
+      #   @last_bot_refresh = Time.now.to_i
+      #   puts "restarting the browser. .. ..."
+      #   @bot.bot_refresh
+      #   @bot.login
+      # end
 
       puts "oh man, we have: #{errors.length} errors.." unless errors.empty?
 
@@ -99,6 +105,26 @@ class Global
       bot_do
     end
   end
+
+  def the_tour_loop
+    while @bot_on
+      bot.go_visit_a_relevant_user
+      input = STDIN.gets.chomp
+    end
   end
 
-  Global.new
+  def bot_tour
+    begin
+      the_tour_loop
+    rescue => e
+      puts "! ! ~ - ~ ! !"
+      puts e.message
+      puts "! ! ~ - ~ ! !"
+      errors << e
+      sleep(5)
+      bot_tour
+    end
+  end
+end
+
+Global.new

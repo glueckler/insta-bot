@@ -8,7 +8,7 @@ class HiBot
   ERR_PRIV_ACCT     = 'account is private'
   ERR_INACTIVE_ACCT = 'account is inactive'
   ERR_NO_USER_FOUND = 'could not find a random user in database'
-  ERR_WAIT_ERROR = 'instagram is not cooperating'
+  ERR_WAIT_ERROR    = 'instagram is not cooperating'
   MAX_DAILY_LIKES   = 100
   MAX_HOURLY_LIKES  = 5
 
@@ -78,20 +78,30 @@ class HiBot
   end
 
   def find_user_relevance(username)
-    relevant_usernames = []
-    f                  = open('relevant_accts.txt')
-    f.each_line { |line| relevant_usernames << line.strip }
+    relevant_usernames       = []
+    relevant_username_values = {}
+    f                        = open('relevant_accts.txt')
+    f.each_line do |line|
+      relevant_username = line.strip.split(',')[0]
+      relevant_value    = line.strip.split(',')[1]
+      relevant_usernames << relevant_username
+      relevant_username_values[relevant_username] = relevant_value
+    end
     f.close
 
     puts "finding user relevance"
     navigation.goto_following_modal
 
-    usernames       = action.get_list_of_users_from_following
+    usernames                = action.get_list_of_users_from_following
+    usernames.each do |u|
+      @db.add_to_following(u, username)
+    end
+
     usernames_add_to_network = []
-    relevance_score = 0
+    relevance_score          = 0
     for user in usernames do
       if relevant_usernames.include?(user.strip)
-        relevance_score = relevance_score + 1
+        relevance_score = relevance_score + relevant_username_values[user].to_i
         usernames_add_to_network.push user.strip
       end
     end
@@ -100,11 +110,12 @@ class HiBot
     @db.set_user_follow_count(username, usernames.length)
     puts "relevance score for #{username} is #{relevance_score}"
     usernames_add_to_network.each do |u|
-      puts u
+      puts u + " +" + relevant_username_values[u]
     end
     usernames_add_to_network.each do |u|
       @db.add_network_connection(u, username)
     end
+
     @db.set_user_relevance(username, relevance_score)
   end
 
@@ -145,5 +156,14 @@ class HiBot
     end
 
     { error: nil }
+  end
+
+  def go_visit_a_relevant_user
+    relevant_usernames = @db.get_relevant_user_list
+    usar = relevant_usernames.sample[0]
+    puts "navigating to following page.."
+    puts "https://www.instagram.com/#{usar}"
+
+    navigation.goto_acct(usar)
   end
 end
