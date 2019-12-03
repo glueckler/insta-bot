@@ -159,11 +159,16 @@ class HiBot
   end
 
   def go_visit_a_relevant_user
-    relevant_usernames = @db.get_relevant_user_list
+    relevant_usernames = @db.get_relevant_user_list_without_recently_visited
     usar = relevant_usernames.sample[0]
     puts "navigating to following page.."
     puts "https://www.instagram.com/#{usar}"
 
     navigation.goto_acct(usar)
+    mark_user_as_visited(usar)
+  end
+
+  def mark_user_as_visited(username)
+    @db.add_action(type: Database::ACT_VISIT, username: username)
   end
 end

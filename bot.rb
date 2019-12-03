@@ -50,7 +50,7 @@ class Global
       @cycle_count ||= 0
       @cycle_count += 1
       puts "cycle count: " + @cycle_count.to_s
-      sleep_cycle if @cycle_count == 15
+      sleep_cycle if @cycle_count == 10
 
 
       # if Time.now.to_i > (@last_bot_refresh + 4000)

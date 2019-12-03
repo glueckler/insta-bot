@@ -3,6 +3,7 @@ class Database
   require 'date'
 
   ACT_LIKE = 'like'.freeze
+  ACT_VISIT = 'visit'.freeze
   UNIX_MONTH = 2629743
   UNIX_DAY = 86400
 
@@ -199,8 +200,21 @@ class Database
 
   def get_relevant_user_list
     res = log_exec "SELECT username FROM users
-    WHERE relevance > 9"
+    WHERE relevance > #{ENV['MIN_RELEVANCE']}"
     res.values
+  end
+
+  def get_relevant_user_list_without_recently_visited
+    months_ago = now - (UNIX_MONTH * ENV['MONTHS_RECENT'].to_i)
+    res = log_exec "SELECT users.username FROM users
+    JOIN actions ON actions.username = users.username
+    WHERE users.relevance > #{ENV['MIN_RELEVANCE']}
+    AND
+    actions.type != 'visit'
+    AND
+    interaction_ts < #{months_ago}"
+    return res.values unless res.values.empty?
+    [['sleepythecreator']] # if none are found
   end
 
   private
