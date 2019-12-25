@@ -11,6 +11,7 @@ class HiBot
   ERR_WAIT_ERROR    = 'instagram is not cooperating'
   MAX_DAILY_LIKES   = 100
   MAX_HOURLY_LIKES  = 5
+  REL_USR_COUNT     = 500
 
   attr_reader :navigation, :action, :brow
 
@@ -107,16 +108,23 @@ class HiBot
     end
 
     puts "found #{usernames.length} usernames"
-    @db.set_user_follow_count(username, usernames.length)
-    puts "relevance score for #{username} is #{relevance_score}"
+    relevance_score = ((relevance_score.to_f / usernames.length.to_f) * 1000).round
+
+    min_accts_to_get_relevance = 350
+    if usernames.length < min_accts_to_get_relevance
+      puts "couldn't find more than #{min_accts_to_get_relevance} accts, no relevance score.."
+    else
+      @db.set_user_follow_count(username, usernames.length)
+      puts "relevance score for #{username} is #{relevance_score}"
+      @db.set_user_relevance(username, relevance_score)
+    end
+    
     usernames_add_to_network.each do |u|
       puts u + " +" + relevant_username_values[u]
     end
     usernames_add_to_network.each do |u|
       @db.add_network_connection(u, username)
     end
-
-    @db.set_user_relevance(username, relevance_score)
   end
 
   def go_like_something_and_relevate(username, stop_liking)

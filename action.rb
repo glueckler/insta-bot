@@ -31,7 +31,7 @@ class Action
     following_modal = @brow.div(class: 'isgrP')
     scroll_without_loading_anymore_users = 0
     usernames_list = []
-    while scroll_without_loading_anymore_users < 4 && usernames_list.length < 500
+    while scroll_without_loading_anymore_users < 4 && usernames_list.length < HiBot::REL_USR_COUNT
       Utils.scroll_to_top(following_modal.child.div)
       sleep(0.3)
       Utils.scroll_to_bottom(following_modal.child.div)

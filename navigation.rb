@@ -10,7 +10,7 @@ class Navigation
     @brow = brow
 
     @main_accts = []
-    f = open('relevant_accts.txt')
+    f = open('local_accts.txt')
     f.each_line { |line| @main_accts << line }
     f.close
   end

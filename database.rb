@@ -8,7 +8,7 @@ class Database
   UNIX_DAY = 86400
 
   def self.conn
-    PG.connect :dbname => 'insta_bot', :user => 'shiftbean'
+    PG.connect :dbname => 'insta_bot', :user => 'dbean'
   end
 
   def self.exec(statement)
@@ -18,42 +18,45 @@ class Database
 
   def self.init_database
     conn = Database.conn
-    # conn.exec 'DROP TABLE IF EXISTS actions'
-    # conn.exec 'DROP TABLE IF EXISTS users'
-    # conn.exec "CREATE TABLE users(
-    #   id SERIAL PRIMARY KEY,
-    #   username VARCHAR(30) NOT NULL UNIQUE,
-    #   private BOOLEAN,
-    #   invalid BOOLEAN,
-    #   cc,
-    #   relevance INTEGER,
-    #   following_count INTEGER
-    # )"
-    #
-    # # this is more of an audits table
-    # # we'll query this table to see if we've gone over max daily actions
-    # conn.exec "CREATE TABLE actions(
-    #   id SERIAL PRIMARY KEY,
-    #   type VARCHAR(30),
-    #   username VARCHAR(30) REFERENCES users(username),
-    #   time INTEGER,
-    #   psql_time timestamptz NOT NULL DEFAULT now()
-    # )"
+    conn.exec 'DROP TABLE IF EXISTS actions'
+    conn.exec 'DROP TABLE IF EXISTS users'
+    conn.exec 'DROP TABLE IF EXISTS network'
+    conn.exec 'DROP TABLE IF EXISTS following'
+    
+    conn.exec "CREATE TABLE users(
+      id SERIAL PRIMARY KEY,
+      username VARCHAR(30) NOT NULL UNIQUE,
+      private BOOLEAN,
+      invalid BOOLEAN,
+      relevance INTEGER,
+      interaction_ts INTEGER,
+      following_count INTEGER
+    )"
+    
+    # this is more of an audits table
+    # we'll query this table to see if we've gone over max daily actions
+    conn.exec "CREATE TABLE actions(
+      id SERIAL PRIMARY KEY,
+      type VARCHAR(30),
+      username VARCHAR(30) REFERENCES users(username),
+      time INTEGER,
+      psql_time timestamptz NOT NULL DEFAULT now()
+    )"
 
-    # conn.exec "CREATE TABLE network(
-    #   id SERIAL PRIMARY KEY,
-    #   username VARCHAR(30),
-    #   followed_by VARCHAR(30),
-    #   interaction_ts INTEGER
-    # )"
-    #
+    conn.exec "CREATE TABLE network(
+      id SERIAL PRIMARY KEY,
+      username VARCHAR(30),
+      followed_by VARCHAR(30),
+      interaction_ts INTEGER
+    )"
+    
 
-    # conn.exec "CREATE TABLE following(
-    #   id SERIAL PRIMARY KEY,
-    #   username VARCHAR(30),
-    #   followed_by VARCHAR(30),
-    #   interaction_ts INTEGER
-    # )"
+    conn.exec "CREATE TABLE following(
+      id SERIAL PRIMARY KEY,
+      username VARCHAR(30),
+      followed_by VARCHAR(30),
+      interaction_ts INTEGER
+    )"
 
 
   end
