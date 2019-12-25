@@ -110,15 +110,10 @@ class HiBot
     puts "found #{usernames.length} usernames"
     relevance_score = ((relevance_score.to_f / usernames.length.to_f) * 1000).round
 
-    min_accts_to_get_relevance = 350
-    if usernames.length < min_accts_to_get_relevance
-      puts "couldn't find more than #{min_accts_to_get_relevance} accts, no relevance score.."
-    else
-      @db.set_user_follow_count(username, usernames.length)
-      puts "relevance score for #{username} is #{relevance_score}"
-      @db.set_user_relevance(username, relevance_score)
-    end
-    
+    @db.set_user_follow_count(username, usernames.length)
+    puts "relevance score for #{username} is #{relevance_score}"
+    @db.set_user_relevance(username, relevance_score)
+
     usernames_add_to_network.each do |u|
       puts u + " +" + relevant_username_values[u]
     end
