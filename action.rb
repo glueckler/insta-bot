@@ -49,7 +49,7 @@ class Action
         puts usernames_list.length.to_s + " usernames scrolled" if usernames_list.length % 50 > 38
       end
     end
-    usernames_list
+    usernames_list.uniq
   end
 
   private

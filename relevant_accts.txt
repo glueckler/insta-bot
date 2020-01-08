@@ -96,7 +96,6 @@ gisaza_,3
 gjonesbass,1
 goodnightout_vancouver,3
 goopsteppa,3
-goopsteppa,5
 grandtheft,1
 greazus,3
 griz,1
@@ -118,7 +117,7 @@ hyphomcr,3
 iamsammyrich,3
 illgatesmusic,1
 ims2gram,3
-innamindrecs,3
+innamindrecs,1
 intrasol_music,3
 ion.music,3
 itscopycatt,1
@@ -189,7 +188,7 @@ provocativebeats,3
 quixofficial,1
 rabbitseatlettuce,1
 raquel_divar,3
-real.khiva,1
+real.khiva,3
 realillchill,3
 reidspeed,1
 rezinatepresents,3
@@ -264,7 +263,7 @@ tor_music,1
 touchbass_au,1
 tourist,1
 township_rebellion,1
-tripleatalent,3
+tripleatalent,5
 troyboi,1
 truthdubstep,1
 ukf,1
@@ -289,3 +288,14 @@ zhu,1
 zomboy,1
 ztrip,1
 _keepdeep,1
+matthealien,3
+beedee_,1
+the_amp_smf,3
+bananacamphoto,1
+sicariasound,1
+joenicedj,1
+jkenzomusic,3
+maladmz,1
+distinctmotive,1
+carissa_gem,3
+dre_truth,1

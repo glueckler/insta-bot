@@ -65,7 +65,7 @@ class Database
 
   def add_user(username)
     begin
-      log_exec "INSERT INTO users (username, interaction_ts, relevance) VALUES ('#{username}', 0, -1)"
+      log_exec "INSERT INTO users (username, interaction_ts, relevance, visit_ts) VALUES ('#{username}', 0, -1, 0)"
     rescue StandardError => what
       if what.exception.class == PG::UniqueViolation
         puts "user #{username} already found.."
@@ -147,6 +147,7 @@ class Database
     username = log_exec "SELECT username AS username from users
     WHERE relevance = -1
     AND private IS NOT true
+    AND invalid IS NOT true
     ORDER BY random() limit 1"
 
     return :no_user if username.values.empty?
@@ -210,14 +211,19 @@ class Database
   def get_relevant_user_list_without_recently_visited
     months_ago = now - (UNIX_MONTH * ENV['MONTHS_RECENT'].to_i)
     res = log_exec "SELECT users.username FROM users
-    JOIN actions ON actions.username = users.username
     WHERE users.relevance > #{ENV['MIN_RELEVANCE']}
     AND
-    actions.type != 'visit'
-    AND
-    interaction_ts < #{months_ago}"
+    visit_ts < #{months_ago}"
     return res.values unless res.values.empty?
     [['sleepythecreator']] # if none are found
+  end
+
+  def mark_user_visited_ts(username)
+    ts = DateTime.now.strftime('%s')
+    log_exec "UPDATE users
+    SET visit_ts = #{ts}
+    WHERE
+    username = '#{username}'"
   end
 
   private

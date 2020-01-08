@@ -168,10 +168,6 @@ class HiBot
     puts "https://www.instagram.com/#{usar}"
 
     navigation.goto_acct(usar)
-    mark_user_as_visited(usar)
-  end
-
-  def mark_user_as_visited(username)
-    @db.add_action(type: Database::ACT_VISIT, username: username)
+    @db.mark_user_visited_ts(usar)
   end
 end
