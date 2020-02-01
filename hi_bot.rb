@@ -162,7 +162,11 @@ class HiBot
   end
 
   def go_visit_a_relevant_user
-    relevant_usernames = @db.get_relevant_user_list_without_recently_visited
+    if ENV['REL_VIA_USER']
+      relevant_usernames = @db.get_relevant_user_list_from_given_username(ENV['REL_VIA_USER'])
+    elsif ENV['MIN_RELEVANCE']
+      relevant_usernames = @db.get_relevant_user_list_without_recently_visited
+    end
     usar = relevant_usernames.sample[0]
     puts "navigating to following page.."
     puts "https://www.instagram.com/#{usar}"

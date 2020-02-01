@@ -218,6 +218,23 @@ class Database
     [['sleepythecreator']] # if none are found
   end
 
+  def get_relevant_user_list_from_given_username(user)
+    months_ago = now - (UNIX_MONTH * ENV['MONTHS_RECENT'].to_i)
+    res = log_exec "SELECT following.username, users.visit_ts, count(following.username) AS follow_count
+    FROM following
+    JOIN users ON users.username = following.username
+    WHERE following.username in (SELECT username FROM following WHERE followed_by = '#{user}')
+    AND
+    users.visit_ts < #{months_ago}
+    GROUP BY following.username, users.visit_ts
+    HAVING count(following.username) BETWEEN 20 AND 50"
+
+    puts res.values
+
+    return res.values unless res.values.empty?
+    [['sleepythecreator']] # if none are found
+  end
+
   def mark_user_visited_ts(username)
     ts = DateTime.now.strftime('%s')
     log_exec "UPDATE users
